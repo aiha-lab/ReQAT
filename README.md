@@ -186,11 +186,6 @@ After QAT, `convert_fake_mxfp4_weight_only.py` converts the fake-quantized model
 - `NVFP4_W4A4_E1M2_KV4_FAKE_CFG`: quantization config for NVFP4 W4A4 with E1M2 KV cache
 - `QATSFTTrainer`: HuggingFace Trainer integration for fake-quantized QAT
 
-Install via:
-```bash
-pip install -e training/
-```
-
 ## Citation
 This repository implements the core code based on “Quantization Hurts Reasoning? An Empirical Study on Quantized Reasoning Models” (COLM 2025), using NVIDIA ModelOpt as the quantization framework.
 
