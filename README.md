@@ -5,11 +5,11 @@ This repository provides the core implementation for the paper:
 > **ReQAT: Achieving Full-Precision Reasoning Accuracy with 4-bit Floating-Point Quantization-Aware Training**
 
 > [!NOTE]
-> **Hardware requirements.** The experiments in the paper were conducted on 8× NVIDIA H200 GPUs. Running this codebase requires a Hopper-generation GPU (H100/H200) or above, as it relies on NVFP4 hardware support and related kernel optimizations.
+> **Hardware requirements.** The experiments in the paper were conducted on 8× NVIDIA H200 GPUs. This codebase requires a Hopper-generation GPU (H100/H200) or newer, as it uses NVFP4 hardware support and optimized kernels.
 >
-> **Models and Dataset.** This repository was tested by fine-tuning **DeepSeek-R1-Distill-Qwen-14B** and **DeepSeek-R1-Distill-Llama-8B** on the math subset of **open-thoughts/OpenThoughts3-1.2M**. Before Stage-2 QAT, please verify that Stage-1 BF16 SFT improves reasoning accuracy on your target benchmarks.
+> **Models and dataset.** This repository has been tested with **DeepSeek-R1-Distill-Qwen-14B** and **DeepSeek-R1-Distill-Llama-8B**, fine-tuned on the math subset of **open-thoughts/OpenThoughts3-1.2M**. When adapting the pipeline to other models or datasets, we recommend first verifying that Stage-1 BF16 SFT yields measurable reasoning improvements on the target benchmarks before applying Stage-2 QAT.
 >
-> **Scope of this release.** This repository provides the core implementation of the paper's methods — including all main algorithmic components (TAQ, SEM, Q-FIT), model definitions, training objectives, and inference code. However, we have not re-run the full set of experiments due to resource constraints. The code is released to facilitate reproducibility and future research, not as a verified reproduction package.
+> **Release scope.** This repository contains the core implementation of the paper’s methods, including TAQ, SEM, Q-FIT, model definitions, training objectives, and inference code. It is intended as a research code release focused on the main algorithmic components, rather than a turnkey reproduction package for all reported experiments.
 
 ## ReQAT Models
 
