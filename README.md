@@ -144,7 +144,7 @@ Key training arguments:
 --quant_cfg NVFP4_W4A4_E1M2_KV4_FAKE_CFG
 ```
 
-After QAT, `convert_fake_mxfp4_weight_only.py` converts the fake-quantized model to a deployment-ready format.
+After QAT, `convert_fake_mxfp4_weight_only.py` converts the fake-quantized model to an evaluation-ready format compatible with the repository's inference code.
 
 ## Repository Structure
 
