@@ -97,19 +97,11 @@ Q-FIT is implemented in `methods/daroc/`. It jointly calibrates pre-RoPE paired 
 - Captures pre-RoPE Q, K, V projections layer-by-layer via forward hooks
 - Performs a 20×20 grid search over scale exponent α_s ∈ [0, 1] and shift fraction α_m ∈ [0, 1]
 - At each grid point, computes attention score MSE between BF16 reference and KV-quantized output
-- Selects (α_s, α_m) minimizing MSE, corresponding to Algorithm 1 in the paper
+- Selects (α_s, α_m) minimizing MSE
 
 **Outputs:**
 - Calibrated model with pre-RoPE scales folded into Q/K projection weights
 - `k_shift_dict.pt`: per-layer post-RoPE key shift vectors (m in the paper), applied during QAT via `KShiftCallback`
-
-The calibration implements the functional transformation:
-
-```
-Q̄ = RoPE(Q_pre ⊙ s),   K̄ = RoPE(K_pre ⊙ s) − m
-```
-
-where s is folded into projection weights (no inference overhead) and m is stored as a fixed buffer applied after RoPE.
 
 ### Step 3: Stage 2 QAT with SEM
 
