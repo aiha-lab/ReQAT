@@ -7,6 +7,8 @@ This repository provides the core implementation for the paper:
 > [!NOTE]
 > **Hardware requirements.** The experiments in the paper were conducted on 8× NVIDIA H200 GPUs. Running this codebase requires a Hopper-generation GPU (H100/H200) or above, as it relies on NVFP4 hardware support and related kernel optimizations.
 >
+> **Models and Dataset.** This repository was tested by fine-tuning **DeepSeek-R1-Distill-Qwen-14B** and **DeepSeek-R1-Distill-Llama-8B** on the math subset of **open-thoughts/OpenThoughts3-1.2M**. Before Stage-2 QAT, please verify that Stage-1 BF16 SFT improves reasoning accuracy on your target benchmarks.
+>
 > **Scope of this release.** This repository provides the core implementation of the paper's methods — including all main algorithmic components (TAQ, SEM, Q-FIT), model definitions, training objectives, and inference code. However, we have not re-run the full set of experiments due to resource constraints. The code is released to facilitate reproducibility and future research, not as a verified reproduction package.
 
 ## ReQAT Models
