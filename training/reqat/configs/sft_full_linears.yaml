@@ -1,0 +1,56 @@
+# Model
+model_name_or_path: deepseek-r1
+attn_implementation: flash_attention_2
+torch_dtype: bfloat16
+
+# Dataset
+#dataset_name: HuggingFaceH4/Multilingual-Thinking
+#dataset_name: FalseReject_as_MultilingualThinking-1k
+#dataset_name: dataset/OpenThought-DeepSeek-114k
+#dataset_name: dataset/OpenThought-DeepSeek-10k-lm-processed
+#dataset_name: dataset/OpenThought-DeepSeek-10k-lm-processed-completion-mask # KD/SFT dataset
+#dataset_name: dataset/OpenThought-10K-Onpolicy-DSR1Qwen14B-$ds_mode-2k # on-policy dataset
+#dataset_name: dataset/OpenThought-DeepSeek-10k-math-sft # V2
+#dataset_name: dataset/OpenThought3-DeepSeek-12k-sft
+#dataset_name: dataset/OpenThought3-Qwen3-12k-sft
+#dataset_name: dataset/OpenThought3-Qwen3-12k-sft-v2
+dataset_name: null
+dataset_num_proc: 12
+
+# Hyperparameters
+distill: false
+teacher_model: null
+completion_only_loss: true
+learning_rate: 2.0e-6
+gradient_checkpointing: true
+num_train_epochs: 1.0
+logging_steps: 1
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 2
+max_length: 25000
+warmup_ratio: 0.03
+lr_scheduler_type: cosine_with_min_lr
+lr_scheduler_kwargs:
+  min_lr_rate: 0.1
+output_dir: gpt-oss-20b-multilingual-reasoner
+report_to: wandb
+#report_to:
+#  - trackio
+seed: 42
+eval_on_start: false
+eval_strategy: steps
+eval_steps: 1000
+dataset_test_split: test
+save_steps: 10000000000
+save_total_limit: 1
+save_strategy: "no"
+
+# ModelOpt Quantization Parameters
+quant_cfg:  # Examples: MXFP4_MLP_WEIGHT_ONLY_CFG, NVFP4_MLP_WEIGHT_ONLY_CFG, NVFP4_MLP_ONLY_CFG
+            # For the full list of supported configs, do: mtq.config.choices
+# MXFP4_WEIGHT_ONLY_CFG
+# NVFP4_WEIGHT_ONLY_CFG
+# NVFP4_FAKE_CFG
+# NVFP4_W4A4KV4_FAKE_CFG
+calib_size: 128

@@ -1,0 +1,46 @@
+from vllm import ModelRegistry
+from vllm_custom.model_executor.fake_quantized_models.llama_fake_quantized import LlamaFakeQuantizedForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.llama_flatquant import LlamaFlatQuantForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.llama_kvquant_star import LlamaKVQuantStarForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.llama_quarot_kv import LlamaQuaRotKVForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.llama_quarot import LlamaQuaRotForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_fake_quantized import Qwen2FakeQuantizedForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_flatquant import Qwen2FlatQuantForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_kvquant_star import Qwen2KVQuantStarForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_quarot_kv import Qwen2QuaRotKVForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_quarot import Qwen2QuaRotForCausalLM
+# MX
+from vllm_custom.model_executor.fake_quantized_models.llama_fake_quantized_mx import LlamaFakeQuantizedMxForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_fake_quantized_mx import Qwen2FakeQuantizedMxForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_prefill_quantized_mx import Qwen2PrefillQuantizedMxForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen3_fake_quantized_mx import Qwen3FakeQuantizedMxForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_rotation_mx import Qwen2RotationMxForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_rotation_mx_direct import Qwen2RotationMxDirectForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_fake_noisy import Qwen2FakeNoisyForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen3_fake_noisy import Qwen3FakeNoisyForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen2_fake_quantized_modelopt import Qwen2FakeQuantizedModelOPTForCausalLM
+from vllm_custom.model_executor.fake_quantized_models.qwen3_fake_quantized_modelopt import Qwen3FakeQuantizedModelOPTForCausalLM
+
+
+def register_fake_quantized_models():
+    ModelRegistry.register_model("LlamaFakeQuantizedForCausalLM", LlamaFakeQuantizedForCausalLM)
+    ModelRegistry.register_model("LlamaFlatQuantForCausalLM", LlamaFlatQuantForCausalLM)
+    ModelRegistry.register_model("LlamaKVQuantStarForCausalLM", LlamaKVQuantStarForCausalLM)
+    ModelRegistry.register_model("LlamaQuaRotKVForCausalLM", LlamaQuaRotKVForCausalLM)
+    ModelRegistry.register_model("LlamaQuaRotForCausalLM", LlamaQuaRotForCausalLM)
+    ModelRegistry.register_model("Qwen2FakeQuantizedForCausalLM", Qwen2FakeQuantizedForCausalLM)
+    ModelRegistry.register_model("Qwen2FlatQuantForCausalLM", Qwen2FlatQuantForCausalLM)
+    ModelRegistry.register_model("Qwen2KVQuantStarForCausalLM", Qwen2KVQuantStarForCausalLM)
+    ModelRegistry.register_model("Qwen2QuaRotKVForCausalLM", Qwen2QuaRotKVForCausalLM)
+    ModelRegistry.register_model("Qwen2QuaRotForCausalLM", Qwen2QuaRotForCausalLM)
+    # MX
+    ModelRegistry.register_model("LlamaFakeQuantizedMxForCausalLM", LlamaFakeQuantizedMxForCausalLM)
+    ModelRegistry.register_model("Qwen2FakeQuantizedMxForCausalLM", Qwen2FakeQuantizedMxForCausalLM)
+    ModelRegistry.register_model("Qwen2PrefillQuantizedMxForCausalLM", Qwen2PrefillQuantizedMxForCausalLM)
+    ModelRegistry.register_model("Qwen3FakeQuantizedMxForCausalLM", Qwen3FakeQuantizedMxForCausalLM)
+    ModelRegistry.register_model("Qwen2RotationMxForCausalLM", Qwen2RotationMxForCausalLM)
+    ModelRegistry.register_model("Qwen2RotationMxDirectForCausalLM", Qwen2RotationMxDirectForCausalLM)
+    ModelRegistry.register_model("Qwen2FakeNoisyForCausalLM", Qwen2FakeNoisyForCausalLM)
+    ModelRegistry.register_model("Qwen3FakeNoisyForCausalLM", Qwen3FakeNoisyForCausalLM)
+    ModelRegistry.register_model("Qwen2FakeQuantizedModelOPTForCausalLM", Qwen2FakeQuantizedModelOPTForCausalLM)
+    ModelRegistry.register_model("Qwen3FakeQuantizedModelOPTForCausalLM", Qwen3FakeQuantizedModelOPTForCausalLM)
