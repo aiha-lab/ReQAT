@@ -77,7 +77,7 @@ def main(args):
     generation_parameters = GenerationParameters(
         temperature=args.temperature,
         top_p=args.top_p,
-        top_k=30 if "QwQ" in args.model else args.top_k,  # TODO. enable top_k only for QwQ?
+        top_k=30 if "QwQ" in args.model else args.top_k,
         max_new_tokens=args.max_new_tokens,
         seed=args.seed
     )

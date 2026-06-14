@@ -169,7 +169,7 @@ class VLLMModel(LightevalModel):
             torch_dtype (Optional[Union[str, torch.dtype]], optional): The torch data type for the model. Defaults to None.
             quantization_config (Optional[Union[BitsAndBytesConfig, GPTQConfig]], optional): The quantization configuration for the model. Defaults to None.
             trust_remote_code (bool, optional): Whether to trust remote code. Defaults to False.
-            cache_dir (str, optional): The cache directory for the model. Defaults to "/scratch".
+            cache_dir (str, optional): The cache directory for the model. Defaults to None.
 
         Returns:
             transformers.PreTrainedModel: The created auto model instance.

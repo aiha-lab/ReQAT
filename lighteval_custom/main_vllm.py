@@ -28,7 +28,7 @@ from lighteval_custom.models.vllm.vllm_model import VLLMModelConfig
 
 
 TOKEN = os.getenv("HF_TOKEN")
-CACHE_DIR: str = os.getenv("HF_HOME", "/scratch")
+CACHE_DIR: str = os.getenv("HF_HOME", None)
 
 HELP_PANEL_NAME_1 = "Common Parameters"
 HELP_PANEL_NAME_2 = "Logging Parameters"
