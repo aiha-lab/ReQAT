@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReQAT: Achieving Full-Precision Reasoning Accuracy with 4-bit Floating-Point Quantization-Aware Training</title>
+  <meta name="description" content="ReQAT is a reasoning-centric FP4 quantization-aware training framework that matches and surpasses BF16 fine-tuning accuracy on Large Reasoning Models, while delivering up to 3.9x throughput speedup on NVIDIA Blackwell. ICML 2026.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <style>
+    :root{
+      --primary:#0e7c66;
+      --primary-dark:#0a5f4d;
+      --accent:#b9700f;
+      --accent-bg1:#fff8ec;
+      --accent-bg2:#fdedce;
+    }
+    body { font-family:'Noto Sans', sans-serif; color:#222; }
+    .title, .subtitle, .publication-title { font-family:'Google Sans', sans-serif; }
+
+    /* ---- Hero ---- */
+    .hero.is-reqat{ background:linear-gradient(135deg,#0a2233 0%,#0f4a45 55%,#138a73 100%); }
+    .hero.is-reqat .publication-title{ color:#fff; }
+    .hero.is-reqat .publication-authors, .hero.is-reqat .is-size-6{ color:#eef6f3; }
+    .hero.is-reqat .affil-line{ color:#bfe6da; }
+    .hero.is-reqat sup.eq{ color:#9fd8c6; }
+    .icml-badge{
+      display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.5);
+      color:#fff; border-radius:999px; padding:.3rem .9rem; font-size:.85rem; font-weight:600;
+      letter-spacing:.02em; margin-bottom:1rem;
+    }
+    .btn-link{ margin:.25rem; }
+    .hero.is-reqat .button.is-hero{
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.55); color:#fff;
+    }
+    .hero.is-reqat .button.is-hero:hover{ background:#fff; color:#0a2233; }
+
+    .author-block{ display:inline-block; margin:0 .55rem; }
+    .eq{ color:#888; font-size:.85rem; }
+    .section{ padding:2.6rem 1.5rem; }
+    .section.alt{ background:#f6faf9; }
+    .sec-title{ margin-bottom:1.6rem !important; }
+    h2.title.is-3{ position:relative; padding-bottom:.5rem; }
+    h2.title.is-3::after{
+      content:''; display:block; width:48px; height:3px;
+      background:linear-gradient(90deg,var(--primary),#5fc9af); border-radius:2px; margin:.5rem auto 0;
+    }
+    .body-wrap{ max-width:840px; margin:0 auto; }
+    .body-wrap h3{ color:var(--primary-dark); font-family:'Google Sans'; font-weight:700; }
+
+    .metric-card{
+      border:1px solid #e3eeec; border-radius:12px; padding:1.7rem 1rem; text-align:center;
+      height:100%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.05);
+    }
+    .metric-num{ font-family:'Google Sans'; font-size:2.5rem; font-weight:700; color:var(--primary); line-height:1.1; }
+    .metric-lab{ color:#444; margin-top:.6rem; font-size:.96rem; }
+
+    .fig{ text-align:center; margin:1.4rem auto 0; }
+    .fig img{ width:100%; max-width:920px; border:1px solid #ececec; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    .fig figcaption{ color:#555; font-size:.93rem; margin:.8rem auto 0; max-width:840px; text-align:left; }
+
+    .framework-spot{
+      background:linear-gradient(135deg,var(--accent-bg1) 0%, var(--accent-bg2) 100%);
+      border:2px solid var(--accent); border-radius:16px; padding:1.8rem 2rem; max-width:980px; margin:0 auto;
+    }
+    .framework-spot h3{ color:#1a1f36; }
+
+    .method-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-top:1.8rem; max-width:1080px; margin-left:auto; margin-right:auto; }
+    @media (max-width:768px){ .method-grid{ grid-template-columns:1fr; } }
+    .method-box{
+      background:#fff; border-left:4px solid var(--primary); border-radius:0 10px 10px 0;
+      padding:1.2rem 1.3rem; box-shadow:0 2px 8px rgba(14,124,102,.08);
+    }
+    .method-box .tag-name{ color:var(--primary-dark); font-weight:700; font-family:'Google Sans'; display:block; margin-bottom:.3rem; font-size:1.05rem; }
+
+    pre.bibtex{ background:#f5f5f7; border-radius:8px; padding:1rem; overflow-x:auto; font-size:.85rem; }
+    table.acc td, table.acc th{ text-align:center; vertical-align:middle !important; }
+    table.acc td.lcell, table.acc th.lcell{ text-align:left; }
+    .reqat-row{ background:#eaf6f1; }
+    .reqat-row td{ font-weight:600; }
+    .star{ color:var(--accent); }
+    .table-container{ margin-bottom:1.2rem; }
+    .eq-block{ background:#f5f5f7; border-radius:8px; padding:.9rem 1.1rem; font-family:monospace; font-size:.92rem; }
+  </style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero is-reqat">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+      <span class="icml-badge"><i class="fas fa-award"></i>&nbsp; ICML 2026</span>
+      <h1 class="title is-2 publication-title" style="font-size:2.1rem; line-height:1.4;">ReQAT: Achieving Full-Precision Reasoning Accuracy<br>with 4-bit Floating-Point Quantization-Aware Training</h1>
+      <p class="subtitle is-5" style="margin-top:1rem; color:#bfe6da; font-weight:600;">
+        A reasoning-centric FP4 training framework that matches&mdash;and surpasses&mdash;BF16 accuracy on
+        Large Reasoning Models, with up to <b style="color:#fff;">3.9&times;</b> throughput on NVIDIA Blackwell.</p>
+      <div class="is-size-5 publication-authors" style="margin-top:1.3rem;">
+        <span class="author-block">Janghwan Lee<sup>1</sup></span>
+        <span class="author-block">Sihwa Lee<sup>1</sup></span>
+        <span class="author-block">Jinseok Kim<sup>2</sup></span>
+        <span class="author-block">Yongjik Kim<sup>2</sup></span>
+        <span class="author-block">Jieun Lim<sup>2</sup></span>
+        <span class="author-block">Jinwook Oh<sup>2</sup></span>
+        <span class="author-block">Jungwook Choi<sup>1</sup><sup class="eq">&dagger;</sup></span>
+      </div>
+      <div class="is-size-6 affil-line" style="margin-top:.6rem;">
+        <sup>1</sup>Hanyang University &nbsp;&nbsp; <sup>2</sup>Rebellions Inc., Republic of Korea<br>
+        <sup class="eq">&dagger; Corresponding author</sup>
+      </div>
+      <div class="buttons is-centered" style="margin-top:1.5rem;">
+        <a class="button is-rounded is-hero btn-link" href="https://arxiv.org/pdf/2606.15682">
+          <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (PDF)</span></a>
+        <a class="button is-rounded is-hero btn-link" href="https://github.com/aiha-lab/ReQAT">
+          <span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
+        <a class="button is-rounded is-hero btn-link" href="#results">
+          <span class="icon"><i class="fas fa-chart-line"></i></span><span>Results</span></a>
+        <a class="button is-rounded is-hero btn-link" href="#bibtex">
+          <span class="icon"><i class="fas fa-quote-right"></i></span><span>BibTeX</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HIGHLIGHTS ============ -->
+<section class="section" style="padding-top:2.6rem; padding-bottom:1rem;">
+  <div class="container is-max-desktop">
+    <div class="columns">
+      <div class="column"><div class="metric-card">
+        <div class="metric-num">+15.8 pts</div>
+        <div class="metric-lab">AIME&#8209;120 accuracy over NVFP4 direct PTQ<br><span class="eq">65.94% vs. 50.13% PTQ baseline (W4A4KV4) &mdash; also surpasses BF16 full fine-tuning (65.46%)</span></div></div></div>
+      <div class="column"><div class="metric-card">
+        <div class="metric-num">3.9&times;</div>
+        <div class="metric-lab">end-to-end throughput speedup<br><span class="eq">NVIDIA DGX Spark vs. BF16</span></div></div></div>
+      <div class="column"><div class="metric-card">
+        <div class="metric-num">3.1&times;</div>
+        <div class="metric-lab">end-to-end throughput speedup<br><span class="eq">NVIDIA B200 vs. BF16</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEASER ============ -->
+<section class="section" style="padding-top:1rem;">
+  <div class="container is-max-desktop">
+    <figure class="fig">
+      <img src="assets/img/fig_accuracy.png" alt="PTQ accuracy drop, QAT vs Full-FT vs ReQAT accuracy, and accuracy-throughput trade-off across FP4 deployment recipes">
+      <figcaption><b>FP4 quantization hurts reasoning &mdash; and ReQAT recovers it.</b> (a) NVFP4 W4A4KV4 post-training quantization (PTQ) causes large accuracy drops across DeepSeek&#8209;R1&#8209;distilled reasoning models. (b&ndash;c) Standard quantization-aware training (QAT) narrows the gap under MXFP4 W4A16 and NVFP4 W4A4KV4, but plateaus well below BF16 full fine-tuning (Full&#8209;FT) even with a larger token budget &mdash; ReQAT closes, then <i>surpasses</i> it. (d) Across FP4 deployment recipes, ReQAT reaches the best accuracy&ndash;throughput trade-off: BF16&#8209;level accuracy at FP4 speed.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ABSTRACT ============ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">Abstract</h2>
+    <div class="body-wrap content is-size-6 has-text-justified">
+      <p>Large Reasoning Models (LRMs) achieve strong problem-solving through long chain-of-thought, but their deployment is constrained by the high cost of full-precision inference and growing KV cache footprints. Microscaled FP4 formats enable efficient FP4 deployment; however, fully quantizing weights, activations, and KV caches (W4A4KV4) causes severe reasoning degradation that existing PTQ and QAT fail to recover. We identify that FP4 failures concentrate on <b>low-entropy tokens</b>&mdash;precise symbolic commitments such as digits and operators&mdash;where quantization noise inflates sampling errors that cascade through reasoning traces. Based on this insight, we propose <b>ReQAT</b>, a reasoning-centric FP4 training framework with three components: (i) <b>Trace-Aligned QAT (TAQ)</b>, which revisits identical reasoning traces to focus updates on critical low-entropy decisions; (ii) <b>Selective Entropy Minimization (SEM)</b>, which reinforces confidence at low-entropy positions; and (iii) <b>Q&#8209;FIT</b>, a quantization-friendly initialization that jointly calibrates RoPE-consistent KV cache transformations to stabilize QAT. Under the same training budget, ReQAT not only recovers but <b>surpasses BF16 fine-tuning accuracy</b>, while delivering up to <b>3.9&times;</b> throughput speedup on NVIDIA DGX Spark and <b>3.1&times;</b> on B200.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY FP4 REASONING FAILS ============ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">Why does FP4 reasoning fail?</h2>
+    <div class="body-wrap content is-size-6">
+      <p>Large Reasoning Models spend most of their inference budget on long chain-of-thought decoding, where repeated weight loading and a growing KV cache dominate cost. Microscaled FP4 formats (MXFP4, NVFP4) promise up to <b>4&times;</b> peak throughput on Blackwell-class hardware, but aggressively quantizing weights, activations, and the KV cache (<b>W4A4KV4</b>) causes severe reasoning accuracy loss that existing post-training quantization (PTQ) and quantization-aware training (QAT) fail to recover&mdash;even when QAT is given a much larger fine-tuning token budget.</p>
+      <p><b>The failure concentrates on low-entropy tokens.</b> Grouping over 1.5M generated tokens by predictive entropy, we find low-entropy tokens are dominated by digits and symbolic operators, while high-entropy tokens are connective discourse phrases. Quantization flattens the predictive distribution at both&mdash;but the consequence differs sharply. <b>Entropy-aware mixed-precision decoding</b> (dynamically routing each token's prediction to BF16 or FP4 based on its entropy) and a controlled <b>logit-noise injection</b> experiment both show the same pattern: corrupting <i>low-entropy</i> predictions causes large drops in AIME accuracy, while corrupting <i>high-entropy</i> predictions barely matters.</p>
+      <p>Digging further, FP4 rarely flips the top-1 token at low-entropy positions&mdash;the model's argmax choice is largely preserved. Instead, it substantially inflates the <b>tail probability mass</b> assigned to non-top-1 alternatives, making confident, precise symbolic commitments (like the digit &ldquo;4&rdquo; or an operator) unexpectedly easy to mis-sample during autoregressive decoding, where a single wrong digit can cascade into a fully incorrect reasoning trace.</p>
+    </div>
+    <figure class="fig">
+      <img src="assets/img/fig_noise_analysis.png" alt="Token entropy semantics, predictive distribution flattening under quantization, entropy-aware mixed-precision decoding, logit-noise sensitivity, and tail-mass inflation at low-entropy tokens">
+      <figcaption>(a) Low-entropy tokens are dominated by digits/operators; high-entropy tokens are discourse markers. (b) Quantization flattens the predictive distribution at both entropy levels. (c&ndash;d) Entropy-aware mixed-precision decoding: routing low-entropy predictions to BF16 recovers most of the accuracy lost under quantization; routing high-entropy predictions does not. (e) Logit noise injected at low-entropy positions causes large AIME&#8209;2025 accuracy drops across models; high-entropy noise does not. (f) FP4 rarely flips the low-entropy top-1 token, but substantially inflates its tail-mass&mdash;confident predictions become easy to mis-sample.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ METHOD OVERVIEW ============ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">ReQAT: a reasoning-centric FP4 training framework</h2>
+    <p class="body-wrap has-text-centered is-size-6" style="margin-bottom:1.4rem; color:#444;">Motivated by this insight, ReQAT explicitly targets low-entropy token failures with three complementary components, unified into a single training pipeline.</p>
+    <div class="framework-spot">
+      <figure class="fig" style="margin-top:0;">
+        <img src="assets/img/fig_reqat.png" alt="ReQAT overview: BF16 fine-tuning, Q-FIT calibration, and trace-aligned QAT with SEM loss">
+      </figure>
+      <p class="content is-size-6" style="margin-top:1.2rem; margin-bottom:0;"><b>ReQAT overview.</b> Starting from a pretrained LRM, ReQAT performs BF16 fine-tuning (Stage&#8209;1), calibrates RoPE-consistent KV-cache transformations via Q&#8209;FIT, then applies trace-aligned QAT (Stage&#8209;2, TAQ) with the SEM auxiliary loss&mdash;computed on the <i>same</i> reasoning traces used in Stage&#8209;1&mdash;to obtain an FP4 ReQAT model that matches or exceeds BF16 accuracy.</p>
+    </div>
+
+    <div class="method-grid">
+      <div class="method-box">
+        <span class="tag-name">TAQ &middot; Trace-Aligned QAT</span>
+        A two-stage recipe where Stage&#8209;2 QAT revisits the <i>same</i> reasoning traces used during Stage&#8209;1 BF16 fine-tuning, forcing quantization-aware updates to repeatedly act on the same low-entropy token decisions. A small 70M&#8209;token Stage&#8209;2 budget is enough to match BF16 fine-tuning accuracy.
+      </div>
+      <div class="method-box">
+        <span class="tag-name">SEM &middot; Selective Entropy Minimization</span>
+        An auxiliary loss that sharpens predictive confidence only at low-entropy positions, using a soft, percentile-based weight rather than a hard mask&mdash;reinforcing exactly the confident, quantization-vulnerable symbolic commitments TAQ revisits.
+      </div>
+      <div class="method-box">
+        <span class="tag-name">Q&#8209;FIT &middot; Quantization-Friendly Init</span>
+        Before Stage&#8209;2 QAT, jointly calibrates channel-wise pre-RoPE scaling (folded into projection weights, zero overhead) and post-RoPE shifting of the KV cache, adapting to each layer's outlier pattern to stabilize W4A4KV4 training.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAQ DEEP DIVE ============ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">TAQ in depth: why trace alignment matters</h2>
+    <div class="body-wrap content is-size-6">
+      <p>Using an entropy-change metric that tracks how much token entropy shifts from the base model during training, plain fine-tuning (FT) and plain QAT both induce changes mostly in <i>high</i>-entropy bins, leaving low-entropy bins essentially untouched. A two-stage <b>FT&thinsp;+&thinsp;QAT</b> procedure behaves differently: as Stage&#8209;2 QAT proceeds, entropy changes increasingly appear in <i>low</i>-entropy bins&mdash;but only when Stage&#8209;2 QAT revisits the <b>same</b> reasoning traces as Stage&#8209;1. On different traces, this effect disappears.</p>
+    </div>
+    <figure class="fig">
+      <img src="assets/img/fig_entropy_dynamics.png" alt="Entropy change across baseline entropy bins for FT, QAT, and FT+QAT; normalized entropy for QAT vs FT+QAT with same/different traces">
+      <figcaption>(a) FT and QAT mainly change <i>high</i>-entropy token predictions; FT+QAT increasingly changes <i>low</i>-entropy predictions as Stage&#8209;2 QAT proceeds. (b) FT+QAT on the <b>same</b> reasoning trace yields markedly lower entropy at low-entropy tokens than QAT alone or FT+QAT on a <b>different</b> trace.</figcaption>
+    </figure>
+    <div class="body-wrap content is-size-6" style="margin-top:1.6rem;">
+      <p>We confirm the mechanism by tracking the <b>gradient contribution ratio</b> of low-entropy tokens during QAT (the fraction of total embedding-gradient norm coming from low-entropy positions). Revisiting aligned traces consistently increases this ratio relative to QAT on misaligned traces&mdash;Stage&#8209;2 QAT reallocates learning signal toward exactly the quantization-sensitive low-entropy positions, because the model already learned the reasoning structure during Stage&#8209;1.</p>
+    </div>
+    <figure class="fig" style="max-width:520px;">
+      <img src="assets/img/gradient_ratio.png" alt="Gradient contribution ratio of low-entropy tokens during QAT, with and without trace alignment" style="max-width:520px;">
+      <figcaption>Gradient contribution ratio of low-entropy tokens during QAT. TAQ increases gradient allocation toward vulnerable low-entropy tokens; misaligned traces dilute this effect.</figcaption>
+    </figure>
+    <div class="body-wrap" style="margin-top:1.8rem;">
+      <p class="has-text-centered is-size-6" style="margin-bottom:.8rem;"><b>Effect of trace alignment</b> (MXFP4 W4A16, R1-Qwen-14B AIME accuracy across fine-tuning budgets).</p>
+      <div class="table-container">
+        <table class="table acc is-fullwidth is-narrow is-hoverable">
+          <thead><tr><th class="lcell">Method</th><th>Trace Aligned</th><th>140M</th><th>210M</th><th>280M</th><th>350M</th></tr></thead>
+          <tbody>
+            <tr><td class="lcell">QAT</td><td>&ndash;</td><td>59.88</td><td>61.35</td><td>61.09</td><td>62.29</td></tr>
+            <tr><td class="lcell">FT + QAT</td><td>&ndash;</td><td>60.10</td><td>59.89</td><td>62.19</td><td>62.60</td></tr>
+            <tr class="reqat-row"><td class="lcell">FT + QAT</td><td>&check;</td><td>61.15</td><td>63.65</td><td>65.00</td><td><b>67.29</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="eq has-text-centered">Two-stage QAT without trace alignment gains &le;1%; trace-aligned two-stage QAT (used by TAQ) improves accuracy by about 5%.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SEM DEEP DIVE ============ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">SEM in depth: soft weighting beats a hard mask</h2>
+    <div class="body-wrap content is-size-6">
+      <p>Trace alignment alone is not enough to fully recover FP4 reasoning accuracy: it determines <i>where</i> Stage&#8209;2 QAT applies updates, but not <i>how strongly</i> confidence at low-entropy positions is reinforced. SEM adds an auxiliary entropy-minimization term, computed per token and weighted by <i>w<sub>t</sub></i>, on top of the standard SFT objective:</p>
+      <p class="eq-block has-text-centered">L<sub>SEM</sub> = L<sub>SFT</sub> + &lambda; &middot; (1/T) &sum;<sub>t</sub> w<sub>t</sub> H<sub>t</sub></p>
+      <p>The natural first instinct is a <b>hard binary mask</b>: fully minimize entropy below a threshold &tau;, do nothing above it. SEM instead uses a <b>soft, ramped weight</b> that only reaches zero at the minibatch's minimum entropy and fades linearly up to &tau; (set to the 75th percentile of the minibatch's entropy):</p>
+      <p class="eq-block has-text-centered">w<sub>t</sub> = max( 0,&nbsp; 1 &minus; (H<sub>t</sub> &minus; H<sub>min</sub>) / (&tau; &minus; H<sub>min</sub> + &epsilon;) )</p>
+      <p>The difference matters in practice: a hard mask penalizes every token below &tau; equally hard, including borderline tokens that are only mildly confident&mdash;over-sharpening them can destabilize training. The soft ramp instead concentrates the strongest pressure on the most deterministic tokens (e.g.&nbsp;the digit &ldquo;4&rdquo;) while easing off near the threshold, which is exactly where SEM should be cautious.</p>
+    </div>
+    <div class="body-wrap" style="margin-top:1.6rem;">
+      <p class="has-text-centered is-size-6" style="margin-bottom:.8rem;"><b>Soft weighting vs. hard binary mask</b> (AIME&#8209;90, MXFP4 W4A4 TAQ+Q&#8209;FIT, R1-Qwen-14B). <b>Bold</b> = better at each budget.</p>
+      <div class="table-container">
+        <table class="table acc is-fullwidth is-narrow is-hoverable">
+          <thead><tr><th>Total Fine-Tuning Tokens</th><th>Binary Mask</th><th>Soft Weighting</th></tr></thead>
+          <tbody>
+            <tr><td>140M</td><td>60.14</td><td class="reqat-row"><b>61.81</b></td></tr>
+            <tr><td>210M</td><td>63.19</td><td class="reqat-row"><b>65.14</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="eq has-text-centered">Replacing the hard mask with SEM's soft, percentile-based weighting alone is worth +1.7&ndash;2.0 points&mdash;at the same trace-aligned QAT budget.</p>
+    </div>
+    <div class="body-wrap" style="margin-top:1.8rem;">
+      <p class="has-text-centered is-size-6" style="margin-bottom:.8rem;"><b>Strength of entropy sharpening</b> &mdash; ablation of &lambda; (NVFP4 W4A4KV4, R1&#8209;Llama&#8209;8B).</p>
+      <div class="table-container">
+        <table class="table acc is-fullwidth is-narrow is-hoverable">
+          <thead><tr><th>Q&#8209;FIT</th><th>&lambda;<sub>SEM</sub></th><th>GSM8K</th><th>MATH&#8209;500</th><th>AIME&#8209;120</th><th>Avg.</th></tr></thead>
+          <tbody>
+            <tr><td>&ndash;</td><td>&ndash;</td><td>89.38</td><td>89.80</td><td>38.34</td><td>72.51</td></tr>
+            <tr><td>&check;</td><td>&ndash;</td><td>89.86</td><td>90.72</td><td>40.32</td><td>73.63</td></tr>
+            <tr><td>&check;</td><td>0.03</td><td>89.84</td><td>89.68</td><td>41.46</td><td>73.66</td></tr>
+            <tr class="reqat-row"><td>&check;</td><td><b>0.1</b></td><td>89.95</td><td>90.53</td><td>41.85</td><td><b>74.11</b></td></tr>
+            <tr><td>&check;</td><td>0.5</td><td>89.69</td><td>90.45</td><td>41.88</td><td>74.01</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="eq has-text-centered">SEM consistently helps on top of Q&#8209;FIT, with &lambda;=0.1 giving the best balance&mdash;too small under-sharpens, too large starts to trade off MATH&#8209;500 accuracy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Q-FIT DEEP DIVE ============ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">Q&#8209;FIT in depth: stabilizing the KV cache</h2>
+    <div class="body-wrap content is-size-6">
+      <p>TAQ alone largely recovers accuracy under W4A4, but performance drops sharply once the KV cache is also quantized (W4A4KV4). The challenge is that RoPE-paired channels can carry <i>asymmetric</i> outliers&mdash;so a single shared scaling factor is insufficient&mdash;while post-RoPE key magnitudes <i>oscillate across tokens</i> due to RoPE's rotational structure, making a fixed channel-wise shift suboptimal over long decoding sequences.</p>
+      <p><b>Q&#8209;FIT</b> jointly calibrates a channel-wise pre-RoPE scaling vector <i>s</i> (folded into projection weights, zero inference overhead) and a post-RoPE shifting vector <i>m</i> (fixed after calibration), selecting both by minimizing the distance between BF16 and KV4 attention outputs. Q&#8209;FIT adapts to each layer's characteristics: where channels show asymmetric outliers with small token-wise variation, it relies mainly on shifting; where key magnitudes oscillate strongly across tokens, it relies mainly on scaling.</p>
+    </div>
+    <figure class="fig">
+      <img src="assets/img/fig_rope.png" alt="Pre/Post-RoPE key cache visualization and Q-FIT calibration results showing asymmetric outliers and token-wise oscillation">
+      <figcaption>Pre-/Post-RoPE key cache visualization and Q&#8209;FIT calibration. RoPE-paired channels exhibit asymmetric outliers (b&ndash;c), while post-RoPE magnitudes oscillate across tokens (d&ndash;e); Q&#8209;FIT adapts scaling vs. shifting per layer accordingly, recovering most of the W4A4KV4 accuracy gap (a).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results" class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">Results</h2>
+    <p class="body-wrap has-text-centered is-size-6" style="margin-bottom:1rem;">AIME&#8209;120 accuracy on <b>R1&#8209;Qwen&#8209;14B</b> as the total fine-tuning budget increases. ReQAT<sub>T</sub>, ReQAT<sub>TQ</sub>, and ReQAT<sub>TQS</sub> denote TAQ only, TAQ+Q&#8209;FIT, and the full method (+SEM).</p>
+    <div class="table-container">
+      <table class="table acc is-fullwidth is-narrow is-hoverable">
+        <thead>
+          <tr><th class="lcell">Bit-Precision</th><th class="lcell">Method</th><th>140M</th><th>210M</th><th>280M</th><th>350M</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="lcell" rowspan="2">BF16</td><td class="lcell">Baseline</td><td colspan="4">56.83</td></tr>
+          <tr><td class="lcell">FT</td><td>63.70</td><td>64.17</td><td>65.46</td><td>64.79</td></tr>
+
+          <tr><td class="lcell" rowspan="6">MXFP4<br>W4A16</td><td class="lcell">Direct PTQ</td><td colspan="4">50.37</td></tr>
+          <tr><td class="lcell">FT + PTQ</td><td>54.38</td><td>57.71</td><td>56.87</td><td>56.77</td></tr>
+          <tr><td class="lcell">QAT</td><td>59.88</td><td>61.35</td><td>61.09</td><td>62.29</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>T</sub></td><td>61.15</td><td>63.65</td><td>65.00</td><td>67.29</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQ</sub></td><td>61.36</td><td>65.32</td><td>66.04</td><td>66.98</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQS</sub></td><td><b>65.00</b></td><td><b>66.25</b></td><td><b>67.08</b></td><td><b>68.02</b><sup class="star">&#9733;</sup></td></tr>
+
+          <tr><td class="lcell" rowspan="6">MXFP4<br>W4A4</td><td class="lcell">Direct PTQ</td><td colspan="4">43.96</td></tr>
+          <tr><td class="lcell">FT + PTQ</td><td>45.21</td><td>49.17</td><td>49.48</td><td>48.33</td></tr>
+          <tr><td class="lcell">QAT</td><td>54.59</td><td>55.67</td><td>54.06</td><td>58.03</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>T</sub></td><td>56.15</td><td>59.79</td><td>59.48</td><td>59.69</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQ</sub></td><td>59.48</td><td>62.60</td><td>64.27</td><td>64.48</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQS</sub></td><td><b>59.69</b></td><td><b>62.81</b></td><td><b>64.48</b></td><td><b>65.94</b><sup class="star">&#9733;</sup></td></tr>
+
+          <tr><td class="lcell" rowspan="6">NVFP4<br>W4A4KV4</td><td class="lcell">Direct PTQ</td><td colspan="4">50.13</td></tr>
+          <tr><td class="lcell">FT + PTQ</td><td>55.00</td><td>55.83</td><td>55.21</td><td>55.73</td></tr>
+          <tr><td class="lcell">QAT</td><td>57.09</td><td>57.60</td><td>58.86</td><td>58.23</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>T</sub></td><td><b>60.32</b></td><td>60.42</td><td>63.13</td><td>63.12</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQ</sub></td><td>59.79</td><td>63.44</td><td><b>65.94</b><sup class="star">&#9733;</sup></td><td>65.21</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQS</sub></td><td>59.79</td><td><b>64.28</b></td><td>64.37</td><td><b>65.63</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="eq has-text-centered" style="margin-bottom:2rem;"><sup class="star">&#9733;</sup> marks the best accuracy within each bit-precision setting. ReQAT improves monotonically as TAQ, Q&#8209;FIT, and SEM are added, and matches or exceeds the best BF16 FT accuracy (65.46%) across every FP4 setting&mdash;without increasing the total training budget.</p>
+
+    <p class="body-wrap has-text-centered is-size-6" style="margin-bottom:1rem;">Results on <b>R1&#8209;Llama&#8209;8B</b> under NVFP4 W4A4KV4 (350M-token budget) across benchmarks. <b>Bold</b> = best, <u>underline</u> = second-best.</p>
+    <div class="table-container">
+      <table class="table acc is-fullwidth is-narrow is-hoverable">
+        <thead><tr><th class="lcell">Bit-Precision</th><th class="lcell">Method</th><th>GSM8K</th><th>MATH&#8209;500</th><th>AIME&#8209;120</th></tr></thead>
+        <tbody>
+          <tr><td class="lcell" rowspan="2">BF16</td><td class="lcell">Baseline</td><td>88.49</td><td>90.00</td><td>36.67</td></tr>
+          <tr><td class="lcell">FT</td><td>91.15</td><td>92.18</td><td>48.75</td></tr>
+          <tr><td class="lcell" rowspan="5">NVFP4<br>W4A4KV4</td><td class="lcell">Direct PTQ</td><td>86.45</td><td>84.62</td><td>23.13</td></tr>
+          <tr><td class="lcell">FT + PTQ</td><td>88.42</td><td>88.53</td><td>34.06</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>T</sub></td><td>89.38</td><td>89.80</td><td>38.34</td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQ</sub></td><td><b>89.86</b></td><td><b>90.72</b></td><td><u>40.32</u></td></tr>
+          <tr class="reqat-row"><td class="lcell">ReQAT<sub>TQS</sub></td><td><u>89.85</u></td><td><u>90.53</u></td><td><b>41.85</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="eq has-text-centered">On the harder AIME benchmark, SEM gives a clear additional gain (40.32&rarr;41.85), suggesting that reinforcing low-entropy confidence matters most for the hardest reasoning tasks.</p>
+  </div>
+</section>
+
+<!-- ============ THROUGHPUT ============ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">Throughput on NVIDIA Blackwell</h2>
+    <div class="body-wrap content is-size-6">
+      <p>We evaluate end-to-end inference throughput with <code>trtllm-bench</code> on two NVIDIA Blackwell platforms&mdash;<b>DGX Spark</b> and <b>B200</b>&mdash;under bursty, batched serving (1K requests, 512-token prompts, batches up to 256, 8K/16K-token generations). NVFP4 reaches up to <b>3.93&times;</b> (DGX&nbsp;Spark) and <b>3.13&times;</b> (B200) speedup over BF16; the overhead Q&#8209;FIT adds in ReQAT is small (4&ndash;5%), still delivering up to <b>3.90&times;</b> and <b>3.05&times;</b> speedup.</p>
+      <p>The gains come from two factors: larger batch sizes enabled by NVFP4's smaller weight and KV-cache memory footprint, and the compute efficiency of 4-bit GEMM. At long output lengths, BF16 cannot sustain large batch sizes due to KV-cache growth, while NVFP4 maintains a batch size of 256 up to 8K tokens&mdash;directly translating memory savings into throughput.</p>
+    </div>
+    <figure class="fig">
+      <img src="assets/img/fig_speedup_batch.png" alt="End-to-end throughput speedup on DGX Spark and B200, and BF16 vs NVFP4 memory breakdown">
+      <figcaption>End-to-end throughput speedup for (a) DGX Spark and (b) B200, comparing native NVFP4 and ReQAT-trained NVFP4 against BF16. (c) Memory breakdown at batch size 256: BF16's KV cache growth caps the achievable batch size at long output lengths, while NVFP4's smaller footprint sustains batch 256 up to 8K tokens.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ BIBTEX ============ -->
+<section id="bibtex" class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered sec-title">BibTeX</h2>
+    <pre class="bibtex">@inproceedings{lee2026reqat,
+  title     = {{ReQAT}: Achieving Full-Precision Reasoning Accuracy with 4-bit Floating-Point Quantization-Aware Training},
+  author    = {Lee, Janghwan and Lee, Sihwa and Kim, Jinseok and Kim, Yongjik and Lim, Jieun and Oh, Jinwook and Choi, Jungwook},
+  booktitle = {Proceedings of the 42nd International Conference on Machine Learning (ICML)},
+  year      = {2026},
+  eprint    = {2606.15682},
+  archivePrefix = {arXiv}
+}</pre>
+  </div>
+</section>
+
+<footer class="footer" style="padding:2rem 1.5rem;">
+  <div class="container has-text-centered content is-size-7">
+    <p>Hanyang University &middot; Rebellions Inc. &nbsp;|&nbsp;
+       <a href="https://github.com/aiha-lab/ReQAT">github.com/aiha-lab/ReQAT</a></p>
+    <p class="eq">Page template adapted from the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> academic project page. Content under CC BY-SA 4.0.</p>
+  </div>
+</footer>
+
+</body>
+</html>
