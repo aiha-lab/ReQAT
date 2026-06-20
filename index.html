@@ -263,22 +263,7 @@
       </div>
       <p class="eq has-text-centered">Replacing the hard mask with SEM's soft, percentile-based weighting alone is worth +1.7&ndash;2.0 points&mdash;at the same trace-aligned QAT budget.</p>
     </div>
-    <div class="body-wrap" style="margin-top:1.8rem;">
-      <p class="has-text-centered is-size-6" style="margin-bottom:.8rem;"><b>Strength of entropy sharpening</b> &mdash; ablation of &lambda; (NVFP4 W4A4KV4, R1&#8209;Llama&#8209;8B).</p>
-      <div class="table-container">
-        <table class="table acc is-fullwidth is-narrow is-hoverable">
-          <thead><tr><th>Q&#8209;FIT</th><th>&lambda;<sub>SEM</sub></th><th>GSM8K</th><th>MATH&#8209;500</th><th>AIME&#8209;120</th><th>Avg.</th></tr></thead>
-          <tbody>
-            <tr><td>&ndash;</td><td>&ndash;</td><td>89.38</td><td>89.80</td><td>38.34</td><td>72.51</td></tr>
-            <tr><td>&check;</td><td>&ndash;</td><td>89.86</td><td>90.72</td><td>40.32</td><td>73.63</td></tr>
-            <tr><td>&check;</td><td>0.03</td><td>89.84</td><td>89.68</td><td>41.46</td><td>73.66</td></tr>
-            <tr class="reqat-row"><td>&check;</td><td><b>0.1</b></td><td>89.95</td><td>90.53</td><td>41.85</td><td><b>74.11</b></td></tr>
-            <tr><td>&check;</td><td>0.5</td><td>89.69</td><td>90.45</td><td>41.88</td><td>74.01</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="eq has-text-centered">SEM consistently helps on top of Q&#8209;FIT, with &lambda;=0.1 giving the best balance&mdash;too small under-sharpens, too large starts to trade off MATH&#8209;500 accuracy.</p>
-    </div>
+
   </div>
 </section>
 
