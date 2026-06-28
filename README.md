@@ -5,7 +5,7 @@ This repository provides the core implementation for the paper:
 > **ReQAT: Achieving Full-Precision Reasoning Accuracy with 4-bit Floating-Point Quantization-Aware Training**
 
 > [!NOTE]
-> **Hardware requirements.** The experiments in the paper were conducted on 8× NVIDIA H200 GPUs. This codebase requires a Hopper-generation GPU (H100/H200) or newer, as it uses NVFP4 hardware support and optimized kernels.
+> **Hardware requirements.** The experiments in the paper were conducted on 8× NVIDIA H200 GPUs. This codebase requires a Hopper-generation GPU (H100/H200) or newer (B200), as it uses NVFP4 optimized kernels.
 >
 > **Models and dataset.** This repository has been tested with **DeepSeek-R1-Distill-Qwen-14B** and **DeepSeek-R1-Distill-Llama-8B**, fine-tuned on the math subset of **open-thoughts/OpenThoughts3-1.2M**. When adapting the pipeline to other models or datasets, we recommend first verifying that Stage-1 BF16 SFT yields measurable reasoning improvements on the target benchmarks before applying Stage-2 QAT.
 >
