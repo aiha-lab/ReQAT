@@ -16,10 +16,8 @@ def write_dataset(path, num_requests, input_len, output_len):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", type=str, required=True,
-                    help="Local NVFP4/BF16 checkpoint directory, or a HF id (e.g. the BF16 baseline).")
-    ap.add_argument("--base_model", type=str, default=None,
-                    help="HF id for tokenizer/config when --model is a local directory.")
+    ap.add_argument("--model", type=str, required=True)
+    ap.add_argument("--base_model", type=str, default=None)
     ap.add_argument("--num_requests", type=int, default=1024)
     ap.add_argument("--input_len", type=int, default=512)
     ap.add_argument("--output_len", type=int, default=8192)

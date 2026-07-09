@@ -24,7 +24,7 @@ Pre-trained ReQAT models are available on HuggingFace:
 These models are released in fake-quantized format, compatible with the `vllm_custom` inference code in this repository.
 
 > [!NOTE]
-> For real (hardware-native) NVFP4 quantization, applying the K-shift at inference time requires a modification to TensorRT-LLM. This is not included in the current release.
+> For hardware-native NVFP4 inference on Blackwell, `deploy/trtllm/` provides an end-to-end throughput path with TensorRT-LLM. Accuracy on that path can differ slightly, since ReQAT's E1M2 KV cache and K-shift are not represented by stock TensorRT-LLM (per-block-scaled E2M1 KV); use the `vllm_custom` path for accuracy evaluation.
 
 ## Reasoning Benchmark
 
@@ -49,6 +49,20 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 ENABLE_THINKING=true python -m inference \
 Supported datasets: `AIME-2024`, `AIME-2025`, `AIME-90`, `MATH-500`, `GSM8K`, `NuminaMath-1.5`, `GPQA-Diamond`, `LiveCodeBench`.
 
 `inference.py` loads fake-quantized models via `vllm_custom` (registered through `register_fake_quantized_models()`), which maps the `architectures` field in the model config to the custom vLLM model class.
+
+## Real NVFP4 Inference (TensorRT-LLM)
+
+`deploy/trtllm/` measures end-to-end 4-bit inference throughput on Blackwell (B200 / DGX Spark). It exports a released fake-quantized ReQAT model to a real NVFP4 W4A4KV4 checkpoint and benchmarks output-token throughput against BF16 with `trtllm-bench`:
+
+```bash
+python deploy/trtllm/export_nvfp4.py \
+    --model superdocker/R1-Llama-8B-ReQAT-nvfp4-w4a4kv4-fake \
+    --output_dir ./R1-Llama-8B-ReQAT-nvfp4 --kv nvfp4
+python deploy/trtllm/bench_throughput.py --model ./R1-Llama-8B-ReQAT-nvfp4 \
+    --base_model deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+```
+
+See `deploy/trtllm/README.md` for setup and details.
 
 ## Training Pipeline
 
@@ -164,6 +178,7 @@ After QAT, `convert_fake_mxfp4_weight_only.py` converts the fake-quantized model
 │   └── utils/
 │       └── data_utils.py       # calibration data loading
 ├── vllm_custom/                # Custom vLLM model classes for inference
+├── deploy/trtllm/              # Real NVFP4 W4A4KV4 throughput on TensorRT-LLM
 ├── scripts/
 │   ├── quantization/daroc.sh   # Q-FIT calibration script
 │   └── inference/inference.sh
