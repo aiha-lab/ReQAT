@@ -56,18 +56,18 @@ def save_k_shift(model, out):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", required=True)
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--kv", choices=["nvfp4", "affine", "fp8", "none"], default="nvfp4")
-    ap.add_argument("--calib-samples", type=int, default=32)
-    ap.add_argument("--seqlen", type=int, default=512)
-    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--model", type=str, required=True)
+    ap.add_argument("--output_dir", type=str, required=True)
+    ap.add_argument("--kv", type=str, choices=["nvfp4", "affine", "fp8", "none"], default="nvfp4")
+    ap.add_argument("--calib_samples", type=int, default=32)
+    ap.add_argument("--calib_seqlen", type=int, default=512)
+    ap.add_argument("--device", type=str, default="cuda")
     args = ap.parse_args()
 
     tok = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
     model, is_fake = load_model(args.model, args.device)
     if is_fake:
-        save_k_shift(args.model, args.out)
+        save_k_shift(args.model, args.output_dir)
 
     ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
     texts = [t for t in ds["text"] if len(t) > 200][: args.calib_samples]
@@ -75,13 +75,13 @@ def main():
     def forward_loop(m):
         for t in texts:
             ids = tok(t, return_tensors="pt", truncation=True,
-                      max_length=args.seqlen).input_ids.to(args.device)
+                      max_length=args.calib_seqlen).input_ids.to(args.device)
             m(ids)
 
     model = mtq.quantize(model, quant_cfg(args.kv), forward_loop)
     mtq.print_quant_summary(model)
-    export_hf_checkpoint(model, export_dir=args.out)
-    tok.save_pretrained(args.out)
+    export_hf_checkpoint(model, export_dir=args.output_dir)
+    tok.save_pretrained(args.output_dir)
 
 
 if __name__ == "__main__":
