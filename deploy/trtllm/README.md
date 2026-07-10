@@ -18,8 +18,12 @@ TRT-LLM kernel that supports affine KV.
 
 ## Requirements
 
-A Blackwell GPU with native NVFP4 support (B200 / DGX Spark / SM100 or newer).
-On non-Blackwell hardware TensorRT-LLM cannot run the FP4 path.
+A Blackwell GPU with native NVFP4 support. On non-Blackwell hardware
+TensorRT-LLM cannot run the FP4 path.
+
+The KV cache format is hardware-dependent. B200 / GB200 (SM100) have the
+TRTLLM-gen FP4 attention kernel and run W4A4KV4 (`--kv nvfp4`). DGX Spark / GB10
+(SM121) lack that kernel, so use FP8 KV — W4A4KV8 (`--kv fp8`).
 
 ```bash
 python3.10 -m venv trtllm_env && . trtllm_env/bin/activate
