@@ -55,14 +55,14 @@ def save_k_shift(model, out):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--model", type=str, required=True)
-    ap.add_argument("--output_dir", type=str, required=True)
-    ap.add_argument("--kv", type=str, choices=["nvfp4", "affine", "fp8", "none"], default="nvfp4")
-    ap.add_argument("--calib_samples", type=int, default=32)
-    ap.add_argument("--calib_seqlen", type=int, default=512)
-    ap.add_argument("--device", type=str, default="cuda")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--output_dir", type=str, required=True)
+    parser.add_argument("--kv", type=str, choices=["nvfp4", "affine", "fp8", "none"], default="nvfp4")
+    parser.add_argument("--n_samples", type=int, default=32)
+    parser.add_argument("--seqlen", type=int, default=512)
+    parser.add_argument("--device", type=str, default="cuda")
+    args = parser.parse_args()
 
     tok = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
     model, is_fake = load_model(args.model, args.device)
@@ -70,12 +70,12 @@ def main():
         save_k_shift(args.model, args.output_dir)
 
     ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
-    texts = [t for t in ds["text"] if len(t) > 200][: args.calib_samples]
+    texts = [t for t in ds["text"] if len(t) > 200][: args.n_samples]
 
     def forward_loop(m):
         for t in texts:
             ids = tok(t, return_tensors="pt", truncation=True,
-                      max_length=args.calib_seqlen).input_ids.to(args.device)
+                      max_length=args.seqlen).input_ids.to(args.device)
             m(ids)
 
     model = mtq.quantize(model, quant_cfg(args.kv), forward_loop)

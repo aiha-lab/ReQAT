@@ -5,14 +5,14 @@ from tensorrt_llm.llmapi import LLM, KvCacheConfig
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--model", type=str, required=True)
-    ap.add_argument("--prompt", type=str,
-                    default="What is 12*13? Solve step by step, then give the final answer.")
-    ap.add_argument("--max_new_tokens", type=int, default=256)
-    ap.add_argument("--temperature", type=float, default=0.6)
-    ap.add_argument("--top_p", type=float, default=0.95)
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--prompt", type=str,
+                        default="What is 12*13? Solve step by step, then give the final answer.")
+    parser.add_argument("--max_new_tokens", type=int, default=256)
+    parser.add_argument("--temperature", type=float, default=0.6)
+    parser.add_argument("--top_p", type=float, default=0.95)
+    args = parser.parse_args()
 
     llm = LLM(model=args.model, backend="pytorch", tensor_parallel_size=1,
               kv_cache_config=KvCacheConfig(free_gpu_memory_fraction=0.7))

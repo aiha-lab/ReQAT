@@ -15,15 +15,15 @@ def write_dataset(path, num_requests, input_len, output_len):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--model", type=str, required=True)
-    ap.add_argument("--base_model", type=str, default=None)
-    ap.add_argument("--num_requests", type=int, default=1024)
-    ap.add_argument("--input_len", type=int, default=512)
-    ap.add_argument("--output_len", type=int, default=8192)
-    ap.add_argument("--kv_cache_fraction", type=float, default=0.9)
-    ap.add_argument("--output_json", type=str, default="trtllm_bench.json")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, required=True)
+    parser.add_argument("--base_model", type=str, default=None)
+    parser.add_argument("--num_requests", type=int, default=1024)
+    parser.add_argument("--input_len", type=int, default=512)
+    parser.add_argument("--output_len", type=int, default=8192)
+    parser.add_argument("--kv_cache_fraction", type=float, default=0.9)
+    parser.add_argument("--output_json", type=str, default="trtllm_bench.json")
+    args = parser.parse_args()
 
     stem = os.path.splitext(args.output_json)[0]
     dataset = stem + "_dataset.jsonl"
